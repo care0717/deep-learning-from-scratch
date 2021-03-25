@@ -1,9 +1,6 @@
-import os
-import sys
+from common.activation_function import step_function
 import matplotlib.pylab as plt
 import numpy as np
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from common.activation_function import step_function
 
 
 if __name__ == '__main__':
