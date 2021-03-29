@@ -1,3 +1,5 @@
+This is a fork from https://github.com/oreilly-japan/deep-learning-from-scratch
+
 ゼロから作る Deep Learning
 ==========================
 
