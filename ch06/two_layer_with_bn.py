@@ -1,18 +1,24 @@
 import numpy as np
 from common.differential_function import numerical_gradient
-from common.layer import Affine, Relu, SoftmaxWithLoss
+from common.layer import Affine, Relu, SoftmaxWithLoss, BatchNormalization
 from collections import OrderedDict
 
 
 class TwoLayerNet:
-    def __init__(self, input_size, hidden_size, output_size, weight_init_std=0.01):
+    def __init__(self, input_size, hidden_size, output_size, weight_init_std=0.01, use_batchnorm=False):
         self.params = {'W1': weight_init_std * np.random.randn(input_size, hidden_size), 'b1': np.zeros(hidden_size),
                        'W2': weight_init_std * np.random.randn(hidden_size, output_size), 'b2': np.zeros(output_size)}
 
         self.layers = OrderedDict()
         self.layers['Affine1'] = Affine(self.params['W1'], self.params['b1'])
+        if use_batchnorm:
+            self.params['gamma1'] = np.ones(hidden_size)
+            self.params['beta1'] = np.zeros(hidden_size)
+            self.layers['BatchNorm1'] = BatchNormalization(
+                gamma=self.params['gamma1'], beta=self.params['beta1'])
         self.layers['Relu1'] = Relu()
         self.layers['Affine2'] = Affine(self.params['W2'], self.params['b2'])
+        self.use_batchnorm = use_batchnorm
 
         self.lastLayer = SoftmaxWithLoss()
 
@@ -48,7 +54,11 @@ class TwoLayerNet:
         for layer in layers:
             dout = layer.backward(dout)
 
-        return {
+        dparam = {
             'W1': self.layers['Affine1'].dW, 'b1': self.layers['Affine1'].db,
-            'W2': self.layers['Affine2'].dW, 'b2': self.layers['Affine2'].db
+            'W2': self.layers['Affine2'].dW, 'b2': self.layers['Affine2'].db,
         }
+        if self.use_batchnorm:
+            dparam['beta1'] = self.layers['BatchNorm1'].dbeta
+            dparam['gamma1'] = self.layers['BatchNorm1'].dgamma
+        return dparam
